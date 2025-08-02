@@ -43,8 +43,6 @@ const HomeScreen = () => {
       >
         <PostComposer />
         <PostsList />
-
-        
       </ScrollView>
     </SafeAreaView>
   );

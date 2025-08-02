@@ -1,4 +1,5 @@
 import PostComposer from "@/components/PostComposer";
+import PostsList from "@/components/PostsList";
 import SignOutButton from "@/components/SignOutButton";
 import { usePosts } from "@/hooks/usePosts";
 import { useUserSync } from "@/hooks/useUserSync";
@@ -41,6 +42,7 @@ const HomeScreen = () => {
         }
       >
         <PostComposer />
+        <PostsList />
 
         
       </ScrollView>

@@ -12,8 +12,23 @@ interface PostCardProps {
   currentUser: User;
 }
 
-const PostCard = ({ currentUser, onDelete, onLike, post, isLiked, onComment }: PostCardProps) => {
-  const isOwnPost = post.user._id === currentUser._id;
+// Optional fallback image in case profilePicture fails
+const fallbackImage =
+  "https://cdn-icons-png.flaticon.com/512/847/847969.png"; // or use one from assets
+
+const PostCard = ({
+  currentUser,
+  onDelete,
+  onLike,
+  post,
+  isLiked,
+  onComment,
+}: PostCardProps) => {
+  // Hydration guard: bail out if user is missing or just an ObjectId
+  if (!post.user || typeof post.user === "string") return null;
+
+  const { firstName, lastName, username, profilePicture, _id: authorId } = post.user;
+  const isOwnPost = authorId === currentUser._id;
 
   const handleDelete = () => {
     Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
@@ -27,23 +42,24 @@ const PostCard = ({ currentUser, onDelete, onLike, post, isLiked, onComment }: P
   };
 
   return (
-    <View className="border-b border-gray-100 bg-white">
-      <View className="flex-row p-4">
+    <View className="border-b border-gray-100 bg-white px-4 py-3">
+      <View className="flex-row">
         <Image
-          source={{ uri: post.user.profilePicture || "" }}
+          source={{ uri: profilePicture || fallbackImage }}
           className="w-12 h-12 rounded-full mr-3"
         />
 
-        <View className="flex-1">
-          <View className="flex-row items-center justify-between mb-1">
-            <View className="flex-row items-center">
-              <Text className="font-bold text-gray-900 mr-1">
-                {post.user.firstName} {post.user.lastName}
+        <View className="flex-1 space-y-1">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center flex-wrap">
+              <Text className="font-semibold text-gray-900 mr-1">
+                {firstName} {lastName}
               </Text>
-              <Text className="text-gray-500 ml-1">
-                @{post.user.username} · {formatDate(post.createdAt)}
+              <Text className="text-sm text-gray-500">
+                @{username} · {formatDate(post.createdAt)}
               </Text>
             </View>
+
             {isOwnPost && (
               <TouchableOpacity onPress={handleDelete}>
                 <Feather name="trash" size={20} color="#657786" />
@@ -51,19 +67,19 @@ const PostCard = ({ currentUser, onDelete, onLike, post, isLiked, onComment }: P
             )}
           </View>
 
-          {post.content && (
-            <Text className="text-gray-900 text-base leading-5 mb-3">{post.content}</Text>
-          )}
+          {post.content ? (
+            <Text className="text-gray-800 text-base leading-snug">{post.content}</Text>
+          ) : null}
 
-          {post.image && (
+          {post.image ? (
             <Image
               source={{ uri: post.image }}
-              className="w-full h-48 rounded-2xl mb-3"
+              className="w-full h-48 rounded-xl"
               resizeMode="cover"
             />
-          )}
+          ) : null}
 
-          <View className="flex-row justify-between max-w-xs">
+          <View className="flex-row justify-between max-w-xs pt-2">
             <TouchableOpacity className="flex-row items-center" onPress={() => onComment(post)}>
               <Feather name="message-circle" size={18} color="#657786" />
               <Text className="text-gray-500 text-sm ml-2">

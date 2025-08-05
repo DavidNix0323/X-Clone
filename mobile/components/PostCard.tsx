@@ -13,7 +13,6 @@ interface PostCardProps {
   currentUser?: User;
 }
 
-
 const PostCard = ({
   currentUser,
   onDelete,
@@ -22,10 +21,8 @@ const PostCard = ({
   isLiked,
   onComment,
 }: PostCardProps) => {
-
   const userId = currentUser?._id;
-  const isOwnPost = userId && post.user._id === userId;
-
+  const isOwnPost = userId && post.user?._id === userId;
 
   const handleDelete = () => {
     Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
@@ -38,15 +35,22 @@ const PostCard = ({
     ]);
   };
 
-  return (
+  if (!post.user) return null; // fallback for ghost hydration
 
+  const {
+    firstName,
+    lastName,
+    username,
+    profilePicture,
+  } = post.user;
+
+  return (
     <View className="border-b border-gray-100 bg-white">
       <View className="flex-row p-4">
         <Avatar
-          uploadedImage={isOwnPost ? currentUser?.profilePicture : post.user.profilePicture}
+          uploadedImage={isOwnPost ? currentUser?.profilePicture : profilePicture}
           size={48}
-
-
+        />
         <View className="flex-1 space-y-1">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center flex-wrap">

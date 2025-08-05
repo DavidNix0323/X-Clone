@@ -32,13 +32,16 @@ export const syncUser = asyncHandler(async (req, res) => {
 
   const clerkUser = await clerkClient.users.getUser(userId);
 
+  // Sanitize image URL
+  const fallbackProfile = clerkUser.imageUrl?.startsWith("http") ? clerkUser.imageUrl : "";
+
   const userData = {
     clerkId: userId,
     email: clerkUser.emailAddresses?.[0]?.emailAddress || "",
     firstName: clerkUser.firstName || "",
     lastName: clerkUser.lastName || "",
     username: clerkUser.emailAddresses?.[0]?.emailAddress?.split("@")[0] || "",
-    profilePicture: clerkUser.imageUrl || "",
+    profilePicture: fallbackProfile,
     bannerImage: "",
     bio: "",
     location: "",
@@ -56,26 +59,34 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ clerkId: userId });
 
   if (!user) {
-    console.log("User not found in Mongo for Clerk ID:", userId);
+    console.warn("User not found in Mongo for Clerk ID:", userId);
     return res.status(200).json({ user: null });
   }
 
   res.status(200).json({ user });
 });
 
-// 🖼 Update profile picture
+// 🖼 Update profile picture with fallback guard
 export const updateProfilePicture = asyncHandler(async (req, res) => {
   const { userId } = getAuth(req);
   const { profilePicture } = req.body;
 
-  if (!profilePicture || !profilePicture.startsWith("https://")) {
-    return res.status(400).json({ error: "Invalid image URL" });
+  const clerkUser = await clerkClient.users.getUser(userId);
+  const fallback = clerkUser.imageUrl?.startsWith("http") ? clerkUser.imageUrl : "";
+
+  const sanitized = profilePicture?.startsWith("http") ? profilePicture : fallback;
+
+  if (!sanitized) {
+    return res.status(400).json({ error: "Invalid profile picture URL and no fallback available" });
   }
 
   const user = await User.findOne({ clerkId: userId });
-  if (!user) return res.status(404).json({ error: "User not found" });
+  if (!user) {
+    console.warn("Profile update failed — no user found for Clerk ID:", userId);
+    return res.status(404).json({ error: "User not found" });
+  }
 
-  user.profilePicture = profilePicture;
+  user.profilePicture = sanitized;
   await user.save();
 
   res.status(200).json({

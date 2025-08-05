@@ -1,7 +1,15 @@
 import { useCreatePost } from "@/hooks/useCreatePost";
-import { useUser } from "@clerk/clerk-expo";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Feather } from "@expo/vector-icons";
-import { View, Text, Image, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import Avatar from "../components/Avatar";
 
 const PostComposer = () => {
   const {
@@ -15,12 +23,33 @@ const PostComposer = () => {
     createPost,
   } = useCreatePost();
 
-  const { user } = useUser();
+  const { currentUser, isLoading } = useCurrentUser();
+
+  if (isLoading || !currentUser) {
+    // 🎨 Skeleton preview while loading
+    return (
+      <View className="border-b border-gray-100 p-4 bg-white">
+        <View className="flex-row items-center">
+          <View className="w-12 h-12 rounded-full bg-gray-200 mr-3" />
+          <View className="flex-1 h-6 bg-gray-200 rounded" />
+        </View>
+
+        <View className="mt-4 flex-row justify-between items-center">
+          <View className="flex-row">
+            <View className="w-5 h-5 rounded bg-gray-200 mr-4" />
+            <View className="w-5 h-5 rounded bg-gray-200 mr-4" />
+          </View>
+          <View className="w-16 h-8 rounded-full bg-gray-200" />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="border-b border-gray-100 p-4 bg-white">
       <View className="flex-row">
-        <Image source={{ uri: user?.imageUrl }} className="w-12 h-12 rounded-full mr-3" />
+        <Avatar uploadedImage={currentUser?.profilePicture} size={48} />
+
         <View className="flex-1">
           <TextInput
             className="text-gray-900 text-lg"
@@ -65,7 +94,9 @@ const PostComposer = () => {
         <View className="flex-row items-center">
           {content.length > 0 && (
             <Text
-              className={`text-sm mr-3 ${content.length > 260 ? "text-red-500" : "text-gray-500"}`}
+              className={`text-sm mr-3 ${
+                content.length > 260 ? "text-red-500" : "text-gray-500"
+              }`}
             >
               {280 - content.length}
             </Text>
@@ -73,7 +104,9 @@ const PostComposer = () => {
 
           <TouchableOpacity
             className={`px-6 py-2 rounded-full ${
-              content.trim() || selectedImage ? "bg-blue-500" : "bg-gray-300"
+              content.trim() || selectedImage
+                ? "bg-blue-500"
+                : "bg-gray-300"
             }`}
             onPress={createPost}
             disabled={isCreating || !(content.trim() || selectedImage)}
@@ -83,7 +116,9 @@ const PostComposer = () => {
             ) : (
               <Text
                 className={`font-semibold ${
-                  content.trim() || selectedImage ? "text-white" : "text-gray-500"
+                  content.trim() || selectedImage
+                    ? "text-white"
+                    : "text-gray-500"
                 }`}
               >
                 Post
@@ -95,4 +130,5 @@ const PostComposer = () => {
     </View>
   );
 };
+
 export default PostComposer;

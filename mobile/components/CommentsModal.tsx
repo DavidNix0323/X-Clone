@@ -142,3 +142,4 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
 };
 
 export default CommentsModal;
+

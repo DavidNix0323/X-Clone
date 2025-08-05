@@ -4,28 +4,43 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApiClient, userApi } from "../utils/api";
 import { useCurrentUser } from "./useCurrentUser";
 
+type FormData = {
+  firstName: string;
+  lastName: string;
+  bio: string;
+  location: string;
+  profilePicture: string;
+  bannerImage: string;
+};
+
 export const useProfile = () => {
   const api = useApiClient();
-
   const queryClient = useQueryClient();
+  const { currentUser } = useCurrentUser();
+
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
     bio: "",
     location: "",
+    profilePicture: "",
+    bannerImage: "",
   });
-  const { currentUser } = useCurrentUser();
 
   const updateProfileMutation = useMutation({
-    mutationFn: (profileData: any) => userApi.updateProfile(api, profileData),
+    mutationFn: (profileData: FormData) =>
+      userApi.updateProfile(api, profileData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       setIsEditModalVisible(false);
       Alert.alert("Success", "Profile updated successfully!");
     },
     onError: (error: any) => {
-      Alert.alert("Error", error.response?.data?.error || "Failed to update profile");
+      Alert.alert(
+        "Error",
+        error.response?.data?.error || "Failed to update profile"
+      );
     },
   });
 
@@ -36,12 +51,14 @@ export const useProfile = () => {
         lastName: currentUser.lastName || "",
         bio: currentUser.bio || "",
         location: currentUser.location || "",
+        profilePicture: currentUser.profilePicture || "",
+        bannerImage: currentUser.bannerImage || "",
       });
     }
     setIsEditModalVisible(true);
   };
 
-  const updateFormField = (field: string, value: string) => {
+  const updateFormField = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 

@@ -16,6 +16,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEffect } from "react";
 
 const ProfileScreens = () => {
   const { currentUser, isLoading } = useCurrentUser();
@@ -37,6 +38,12 @@ const ProfileScreens = () => {
     isUpdating,
     refetch: refetchProfile,
   } = useProfile();
+
+  useEffect(() => {
+    if (currentUser?.profilePicture && !formData.profilePicture) {
+      updateFormField("profilePicture", currentUser.profilePicture);
+    }
+  }, [currentUser]);
 
   if (isLoading) {
     return (
@@ -87,7 +94,12 @@ const ProfileScreens = () => {
         <View className="px-4 pb-4 border-b border-gray-100">
           <View className="flex-row justify-between items-end -mt-16 mb-4">
             <Image
-              source={{ uri: currentUser.profilePicture }}
+              source={{
+                uri:
+                  formData.profilePicture ||
+                  currentUser?.profilePicture ||
+                  "https://ui-avatars.com/api/?name=User&background=random",
+              }}
               className="w-32 h-32 rounded-full border-4 border-white"
             />
             <TouchableOpacity
@@ -153,4 +165,3 @@ const ProfileScreens = () => {
 };
 
 export default ProfileScreens;
-

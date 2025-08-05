@@ -11,8 +11,11 @@ export const useCurrentUser = () => {
     refetch,
   } = useQuery({
     queryKey: ["authUser"],
-    queryFn: () => userApi.getCurrentUser(api),
-    select: (response) => response.data.user,
+    queryFn: async () => {
+      const response = await userApi.getCurrentUser(api);
+      return response.data.user; // May be null — you control fallback downstream
+    },
+    refetchOnWindowFocus: false,
   });
 
   return { currentUser, isLoading, error, refetch };

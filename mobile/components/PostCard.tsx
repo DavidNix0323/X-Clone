@@ -38,13 +38,25 @@ const PostCard = ({
     ]);
   };
 
+  if (!post.user) return null; // fallback for ghost hydration
+
+  const {
+    firstName,
+    lastName,
+    username,
+    profilePicture,
+  } = post.user;
+
   return (
+
+
 
     <View className="border-b border-gray-100 bg-white">
       <View className="flex-row p-4">
         <Avatar
           uploadedImage={isOwnPost ? currentUser?.profilePicture : post.user.profilePicture}
           size={48}
+
 
 
         <View className="flex-1 space-y-1">

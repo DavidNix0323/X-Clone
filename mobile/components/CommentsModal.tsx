@@ -1,13 +1,14 @@
 import { useComments } from "@/hooks/useComments";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Post } from "@/types";
+import Avatar from "../components/Avatar";
+
 import {
   View,
   Text,
   Modal,
   TouchableOpacity,
   ScrollView,
-  Image,
   TextInput,
   ActivityIndicator,
 } from "react-native";
@@ -42,9 +43,9 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
           {/* ORIGINAL POST */}
           <View className="border-b border-gray-100 bg-white p-4">
             <View className="flex-row">
-              <Image
-                source={{ uri: selectedPost.user.profilePicture }}
-                className="size-12 rounded-full mr-3"
+              <Avatar
+                uploadedImage={selectedPost.user.profilePicture}
+                size={48}
               />
 
               <View className="flex-1">
@@ -62,11 +63,7 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
                 )}
 
                 {selectedPost.image && (
-                  <Image
-                    source={{ uri: selectedPost.image }}
-                    className="w-full h-48 rounded-2xl mb-3"
-                    resizeMode="cover"
-                  />
+                  <View className="w-full h-48 rounded-2xl mb-3 bg-gray-100" />
                 )}
               </View>
             </View>
@@ -76,9 +73,9 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
           {selectedPost.comments.map((comment) => (
             <View key={comment._id} className="border-b border-gray-100 bg-white p-4">
               <View className="flex-row">
-                <Image
-                  source={{ uri: comment.user.profilePicture }}
-                  className="w-10 h-10 rounded-full mr-3"
+                <Avatar
+                  uploadedImage={comment.user.profilePicture}
+                  size={40}
                 />
 
                 <View className="flex-1">
@@ -89,19 +86,20 @@ const CommentsModal = ({ selectedPost, onClose }: CommentsModalProps) => {
                     <Text className="text-gray-500 text-sm ml-1">@{comment.user.username}</Text>
                   </View>
 
-                  <Text className="text-gray-900 text-base leading-5 mb-2">{comment.content}</Text>
+                  <Text className="text-gray-900 text-base leading-5 mb-2">
+                    {comment.content}
+                  </Text>
                 </View>
               </View>
             </View>
           ))}
 
           {/* ADD COMMENT INPUT */}
-
           <View className="p-4 border-t border-gray-100">
             <View className="flex-row">
-              <Image
-                source={{ uri: currentUser?.profilePicture }}
-                className="size-10 rounded-full mr-3"
+              <Avatar
+                uploadedImage={currentUser?.profilePicture}
+                size={40}
               />
 
               <View className="flex-1">

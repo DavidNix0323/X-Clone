@@ -2,6 +2,7 @@ import { Post, User } from "@/types";
 import { formatDate, formatNumber } from "@/utils/formatters";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { View, Text, Alert, Image, TouchableOpacity } from "react-native";
+import Avatar from "../components/Avatar";
 
 interface PostCardProps {
   post: Post;
@@ -9,11 +10,19 @@ interface PostCardProps {
   onDelete: (postId: string) => void;
   onComment: (post: Post) => void;
   isLiked?: boolean;
-  currentUser: User;
+  currentUser?: User;
 }
 
-const PostCard = ({ currentUser, onDelete, onLike, post, isLiked, onComment }: PostCardProps) => {
-  const isOwnPost = post.user._id === currentUser._id;
+const PostCard = ({
+  currentUser,
+  onDelete,
+  onLike,
+  post,
+  isLiked,
+  onComment,
+}: PostCardProps) => {
+  const userId = currentUser?._id;
+  const isOwnPost = userId && post.user._id === userId;
 
   const handleDelete = () => {
     Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
@@ -29,9 +38,9 @@ const PostCard = ({ currentUser, onDelete, onLike, post, isLiked, onComment }: P
   return (
     <View className="border-b border-gray-100 bg-white">
       <View className="flex-row p-4">
-        <Image
-          source={{ uri: post.user.profilePicture || "" }}
-          className="w-12 h-12 rounded-full mr-3"
+        <Avatar
+          uploadedImage={isOwnPost ? currentUser?.profilePicture : post.user.profilePicture}
+          size={48}
         />
 
         <View className="flex-1">
@@ -44,6 +53,7 @@ const PostCard = ({ currentUser, onDelete, onLike, post, isLiked, onComment }: P
                 @{post.user.username} · {formatDate(post.createdAt)}
               </Text>
             </View>
+
             {isOwnPost && (
               <TouchableOpacity onPress={handleDelete}>
                 <Feather name="trash" size={20} color="#657786" />
@@ -82,7 +92,6 @@ const PostCard = ({ currentUser, onDelete, onLike, post, isLiked, onComment }: P
               ) : (
                 <Feather name="heart" size={18} color="#657786" />
               )}
-
               <Text className={`text-sm ml-2 ${isLiked ? "text-red-500" : "text-gray-500"}`}>
                 {formatNumber(post.likes?.length || 0)}
               </Text>
